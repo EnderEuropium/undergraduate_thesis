@@ -1,0 +1,63 @@
+# Test2
+
+# Packages
+# Voro++ 还是手动算吧
+#package voro voro++.hh
+
+# Setup
+units lj
+timestep 0.001
+atom_style atomic
+dimension 3
+boundary p p p
+
+# Atom definition (Argon), with 4000 atoms
+# lattice fcc 0.8442 random style does not need lattice
+region box block 0 10 0 10 0 10 units box
+create_box 1 box
+create_atoms 1 random 4000 1919 box
+mass 1 39.948
+
+# Set random positions and velocities
+velocity all create 83.8 114514 dist gaussian
+
+# Potential
+pair_style lj/cut 2.5
+pair_coeff 1 1 1.0 1.0 2.5 # IDK epsilon or sigma for sure, suspended 0.238 3.405
+neighbor 0.3 bin
+neigh_modify every 5 delay 0 check yes #binsize 1.0 # check得更勤一些
+
+# Thermodynamics
+#thermo_style custom step temp press vol pe ke etotal # T, P, V, E(potential), E(kinetic), total E
+#thermo 1000 #output thermodynamics every N timesteps
+
+#dump 1 all custom 1000 dump_before.xyz id type x y z
+#dump_modify 1 sort id
+
+# minimize
+# Necessary, otherwise the pressure would be non-numerical
+min_style cg
+minimize 1.0e-4 1.0e-6 100 1000
+run 100000
+reset_timestep 0
+
+thermo_style custom step temp press vol pe ke etotal
+thermo 5000
+
+# Equilibration at 83.8K, melting point
+fix 1 all npt temp 83.8 83.8 100.0 iso 0.0 0.0 1.0
+run 100000 # Melting process
+dump 1 all custom 10000 dump.before.xyz id type x y z
+dump_modify 1 sort id
+#undump 1
+
+# Cooling process
+label cooling
+fix 2 all nve
+fix 3 all temp/rescale 50000 0.0001 0.0001 0.0005 1.0    # temp/rescale method, 不知道Tstart标对没标对
+
+# Dump final atom positions
+dump 3 all custom 10000 dump.final.xyz id type x y z
+dump_modify 3 sort id
+#undump 3
+
