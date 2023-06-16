@@ -1,0 +1,18 @@
+#PBS -N zhangyn_Ar
+#PBS -l nodes=2:ppn=20,walltime=86000:00:0
+#PBS -S /bin/bash
+#PBS -j oe
+
+#PBS -V 
+cd $PBS_O_WORKDIR
+NPROCS=`wc -l< $PBS_NODEFILE`
+#module load /data/public/available_modules/openmpi/1.4.3
+module load /data/public/available_modules/lammps/2020_install
+#module load /data/public/available_modules/fftw/3.3.8 
+PATH=/data/public/mpich/bin:/data/publlic/fftw/bin:$PATH #这一行是找到各个库的位置
+
+LD_LIBRARY_PATH=/data/public/mpich/lib:/data/public/fftw/lib:$LD_LIBRARY_PATH
+
+export PATH="$PATH:/data/public/openmpi/1.4.3/bin"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/data/public/openmpi/1.4.3/lib"
+mpirun -np 16 lmp_mpi -log out.log -in  in.Ar
