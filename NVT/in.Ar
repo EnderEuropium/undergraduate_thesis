@@ -47,7 +47,7 @@ fix 1 all nvt temp 200.0 200.0 10
 compute rdf1 all rdf 300
 fix rdf1 all ave/time 10000 1 10000 c_rdf1[1] c_rdf1[2] c_rdf1[3] file data.rdf.before mode vector
 run 500000
-dump 1 all custom 1000 dump_nvt_${temp}K.relax
+dump 1 all custom 1000 dump_nvt_${temp}K.relax x y z
 unfix extra
 unfix 1
 unfix rdf1
